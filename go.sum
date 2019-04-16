@@ -1,0 +1,6 @@
+github.com/RediSearch/redisearch-go v0.1.0 h1:o8mCfrB3AFdRegYJ+EQNDNHBV57fnzx5vXbT9stnt64=
+github.com/RediSearch/redisearch-go v0.1.0/go.mod h1:6YJdUHnJyl420IOge7s1257XQaeMI14Hqol5pHLjO7k=
+github.com/confluentinc/confluent-kafka-go v1.0.0 h1:y+G9NTXsvoelf1cRzjtLKOZsPqh71noS4+t+e+eINIk=
+github.com/confluentinc/confluent-kafka-go v1.0.0/go.mod h1:u2zNLny2xq+5rWeTQjFHbDzzNuba4P1vo31r9r4uAdg=
+github.com/garyburd/redigo v1.6.0 h1:0VruCpn7yAIIu7pWVClQC8wxCJEcG3nyzpMSHKi1PQc=
+github.com/garyburd/redigo v1.6.0/go.mod h1:NR3MbYisc3/PwhQ00EMzDiPmrwpPxAn5GI05/YaO1SY=
