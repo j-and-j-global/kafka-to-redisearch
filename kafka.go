@@ -18,7 +18,7 @@ func NewKafka(bootstrapServers, topic string) (k Kafka, err error) {
 		"bootstrap.servers":               bootstrapServers,
 		"auto.offset.reset":               "earliest",
 		"group.id":                        "kafka-to-redisearch",
-		"session.timeout.ms":              5000,
+		"session.timeout.ms":              30000,
 		"go.events.channel.enable":        true,
 		"go.application.rebalance.enable": true,
 		"enable.partition.eof":            true,
