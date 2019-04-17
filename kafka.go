@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
@@ -41,6 +43,9 @@ func (k Kafka) ConsumerLoop(c chan []byte) (err error) {
 
 		case kafka.Error:
 			return ev.(kafka.Error)
+
+		default:
+			log.Printf("%+v, %T", ev, ev)
 		}
 	}
 	return

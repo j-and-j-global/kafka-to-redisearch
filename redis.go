@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/RediSearch/redisearch-go/redisearch"
 )
 
@@ -39,7 +41,9 @@ func (r Redis) WriteLoop(c chan []byte) (err error) {
 	for m := range c {
 		message, err = NewMessage(m)
 		if err != nil {
-			return
+			log.Print("%+v is an invalid message: %+v", m, err)
+
+			continue
 		}
 
 		doc := redisearch.NewDocument(message.Slug, 1.0)
