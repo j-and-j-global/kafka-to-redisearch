@@ -16,7 +16,7 @@ func main() {
 		panic(err)
 	}
 
-	log.Print("Config: %+v", c)
+	log.Printf("Config: %+v", c)
 
 	messageChan := make(chan []byte, 1024)
 

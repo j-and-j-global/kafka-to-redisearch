@@ -5,6 +5,29 @@ import (
 	"time"
 )
 
+var (
+	CreateOperation = "CREATE"
+	UpdateOperation = "UPDATE"
+	DeleteOperation = "DELETE"
+)
+
+type MessageWithEnvelope struct {
+	Operation string
+	Message   Message
+}
+
+func (m MessageWithEnvelope) Create() bool {
+	return m.Operation == CreateOperation
+}
+
+func (m MessageWithEnvelope) Update() bool {
+	return m.Operation == UpdateOperation
+}
+
+func (m MessageWithEnvelope) Delete() bool {
+	return m.Operation == DeleteOperation
+}
+
 type Message struct {
 	Slug   string
 	Title  string
@@ -13,7 +36,7 @@ type Message struct {
 	Body   string
 }
 
-func NewMessage(b []byte) (m Message, err error) {
+func ParseMessage(b []byte) (m MessageWithEnvelope, err error) {
 	err = json.Unmarshal(b, &m)
 
 	return

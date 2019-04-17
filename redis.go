@@ -8,7 +8,7 @@ import (
 
 type redisClient interface {
 	CreateIndex(*redisearch.Schema) error
-	Index(...redisearch.Document) error
+	IndexOptions(redisearch.IndexingOptions, ...redisearch.Document) error
 	Info() (*redisearch.IndexInfo, error)
 }
 
@@ -36,25 +36,34 @@ func NewRedis(master, index string) (r Redis, err error) {
 }
 
 func (r Redis) WriteLoop(c chan []byte) (err error) {
-	var message Message
+	var message MessageWithEnvelope
+
+	indexOpts := redisearch.DefaultIndexingOptions
+	indexOpts.Replace = true
 
 	for m := range c {
-		message, err = NewMessage(m)
+		log.Printf("Redis Loop: Handling %q", string(m))
+
+		message, err = ParseMessage(m)
 		if err != nil {
-			log.Print("%+v is an invalid message: %+v", m, err)
+			log.Printf("Redis Loop: invalid message: %+v", err)
 
 			continue
 		}
 
-		doc := redisearch.NewDocument(message.Slug, 1.0)
-		doc.Set("body", message.Body).
-			Set("author", message.Author).
-			Set("title", message.Title).
-			Set("date", message.Date)
+		if message.Create() || message.Update() {
+			doc := redisearch.NewDocument(message.Message.Slug, 1.0)
+			doc.Set("body", message.Message.Body).
+				Set("author", message.Message.Author).
+				Set("title", message.Message.Title).
+				Set("date", message.Message.Date.Unix())
 
-		err = r.client.Index([]redisearch.Document{doc}...)
-		if err != nil {
-			return
+			err = r.client.IndexOptions(indexOpts, []redisearch.Document{doc}...)
+			if err != nil {
+				return
+			}
+		} else if message.Delete() {
+			log.Print("Redis Loop: deletion NOP")
 		}
 	}
 
