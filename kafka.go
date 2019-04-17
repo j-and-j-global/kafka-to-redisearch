@@ -1,13 +1,11 @@
 package main
 
 import (
-	"time"
-
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
 type kafkaClient interface {
-	ReadMessage(time.Duration) (*kafka.Message, error)
+	Events() chan kafka.Event
 	SubscribeTopics([]string, kafka.RebalanceCb) error
 }
 
@@ -17,9 +15,13 @@ type Kafka struct {
 
 func NewKafka(bootstrapServers, topic string) (k Kafka, err error) {
 	k.consumer, err = kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": bootstrapServers,
-		"auto.offset.reset": "earliest",
-		"group.id":          "kafka-to-redisearch",
+		"bootstrap.servers":               bootstrapServers,
+		"auto.offset.reset":               "earliest",
+		"group.id":                        "kafka-to-redisearch",
+		"session.timeout.ms":              5000,
+		"go.events.channel.enable":        true,
+		"go.application.rebalance.enable": true,
+		"enable.partition.eof":            true,
 	})
 
 	if err != nil {
@@ -32,16 +34,14 @@ func NewKafka(bootstrapServers, topic string) (k Kafka, err error) {
 }
 
 func (k Kafka) ConsumerLoop(c chan []byte) (err error) {
-	var msg *kafka.Message
+	for ev := range k.consumer.Events() {
+		switch ev.(type) {
+		case *kafka.Message:
+			c <- ev.(*kafka.Message).Value
 
-	for {
-		msg, err = k.consumer.ReadMessage(-1)
-		if err != nil {
-			return
+		case kafka.Error:
+			return ev.(kafka.Error)
 		}
-
-		c <- msg.Value
 	}
-
 	return
 }
