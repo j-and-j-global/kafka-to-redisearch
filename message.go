@@ -12,8 +12,10 @@ var (
 )
 
 type MessageWithEnvelope struct {
-	Operation string
-	Message   Message
+	Operation  string
+	Provenance string
+	Version    string
+	Message    Message
 }
 
 func (m MessageWithEnvelope) Create() bool {
