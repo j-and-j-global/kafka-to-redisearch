@@ -18,14 +18,22 @@ func main() {
 
 	log.Printf("Config: %+v", c)
 
-	messageChan := make(chan []byte, 1024)
+	inputChan := make(chan MessageWithEnvelope, 1024)
+	outputChan := make(chan MessageWithEnvelope, 1024)
 
 	go func() {
-		err := c.Kafka.ConsumerLoop(messageChan)
+		err := c.Kafka.ConsumerLoop(inputChan)
 		if err != nil {
 			panic(err)
 		}
 	}()
 
-	panic(c.Redis.WriteLoop(messageChan))
+	go func() {
+		err := c.Redis.WriteLoop(outputChan)
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	panic(provenanceParserMap.TransformerLoop(inputChan, outputChan))
 }

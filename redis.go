@@ -35,22 +35,11 @@ func NewRedis(master, index string) (r Redis, err error) {
 	return
 }
 
-func (r Redis) WriteLoop(c chan []byte) (err error) {
-	var message MessageWithEnvelope
-
+func (r Redis) WriteLoop(c chan MessageWithEnvelope) (err error) {
 	indexOpts := redisearch.DefaultIndexingOptions
 	indexOpts.Replace = true
 
-	for m := range c {
-		log.Printf("Redis Loop: Handling %q", string(m))
-
-		message, err = ParseMessage(m)
-		if err != nil {
-			log.Printf("Redis Loop: invalid message: %+v", err)
-
-			continue
-		}
-
+	for message := range c {
 		if message.Create() || message.Update() {
 			doc := redisearch.NewDocument(message.Message.Slug, 1.0)
 			doc.Set("body", message.Message.Body).

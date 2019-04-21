@@ -35,15 +35,18 @@ func NewKafka(bootstrapServers, topic string) (k Kafka, err error) {
 	return
 }
 
-func (k Kafka) ConsumerLoop(c chan []byte) (err error) {
+func (k Kafka) ConsumerLoop(c chan MessageWithEnvelope) (err error) {
 	for ev := range k.consumer.Events() {
 		switch ev.(type) {
 		case *kafka.Message:
-			msg := ev.(*kafka.Message)
+			msg, err := ParseMessage(ev.(*kafka.Message).Value)
+			if err != nil {
+				log.Printf("Kafka Loop: invalid message: %+v", err)
 
-			log.Printf("Kafka Loop: message: %+v", string(msg.Value))
+				continue
+			}
 
-			c <- msg.Value
+			c <- msg
 
 		case kafka.Error:
 			return ev.(kafka.Error)
